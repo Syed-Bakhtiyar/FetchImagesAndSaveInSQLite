@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -30,9 +31,15 @@ public class MyCustomAdapter extends BaseAdapter {
 
     LayoutInflater inflater;
 
+    ByteArrayOutputStream bytearrayoutputstream;
+
+    byte[] _byte;
+
     public MyCustomAdapter(ArrayList<File> arrayList, Context context) {
         this.arrayList = arrayList;
         this.context = context;
+        bytearrayoutputstream = new ByteArrayOutputStream();
+
     }
 
     @Override
@@ -58,11 +65,18 @@ public class MyCustomAdapter extends BaseAdapter {
 
 
 
-        Bitmap myBitmap = BitmapFactory.decodeFile(arrayList.get(i).getAbsolutePath());
+        Bitmap myBitmap = BitmapFactory.decodeFile(arrayList.get(i).getAbsolutePath()),bitmap2;
+
+        myBitmap.compress(Bitmap.CompressFormat.JPEG,40,bytearrayoutputstream);
+
+        _byte = bytearrayoutputstream.toByteArray();
+
+
+        bitmap2 = BitmapFactory.decodeByteArray(_byte,0,_byte.length);
 
         imageView = (ImageView) view.findViewById(R.id.img);
 
-        imageView.setImageBitmap(myBitmap);
+        imageView.setImageBitmap(bitmap2);
 
 
 
