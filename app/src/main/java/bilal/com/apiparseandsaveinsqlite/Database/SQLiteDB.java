@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Created by BILAL on 8/15/2017.
@@ -19,7 +20,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
 
     public static final String LINK = "LINK";
 
-    public static final String CREATEIMAGE_TABLE = "CREATE TABLE "+TABLE_NAME+" ( "+_ID+" INTEGER PRIMARY KEY AUTOINCREMENT , "+LINK+" TEXT)";
+    public static final String CREATEIMAGE_TABLE = "CREATE TABLE "+TABLE_NAME+" ( "+_ID+" INTEGER PRIMARY KEY AUTO INCREMENT , "+LINK+" TEXT)";
 
     public static final String DROP_TABLE = "DROP TABLE IF EXISTS "+TABLE_NAME;
 
@@ -40,9 +41,14 @@ public class SQLiteDB extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
 
+        try {
 
-        sqLiteDatabase.execSQL(CREATEIMAGE_TABLE);
+            sqLiteDatabase.execSQL(CREATEIMAGE_TABLE);
+        }catch (Exception e){
 
+            Log.d("create_table_exception", "onCreate: "+e);
+
+        }
 
     }
 
@@ -57,27 +63,37 @@ public class SQLiteDB extends SQLiteOpenHelper {
 
     public boolean save(String link){
 
-        sqLiteDatabase = getWritableDatabase();
+        try {
 
-        contentValues = new ContentValues();
+            sqLiteDatabase = getWritableDatabase();
 
-        contentValues.put(LINK,link);
+            contentValues = new ContentValues();
 
-        long check = sqLiteDatabase.insert(TABLE_NAME,null,contentValues);
+            contentValues.put(LINK, link);
+
+            long check = sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
 
 
-        if(check == -1){
+            if (check == -1) {
 
+
+                return false;
+
+            } else {
+
+                Log.d("row_id", "save: " + check);
+
+                return true;
+
+            }
+        }catch (Exception e){
+
+
+            Log.d("insertion", "save: "+e);
 
             return false;
 
         }
-        else {
-
-            return true;
-
-        }
-
 
     }
 

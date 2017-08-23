@@ -31,14 +31,11 @@ public class MyCustomAdapter extends BaseAdapter {
 
     LayoutInflater inflater;
 
-    ByteArrayOutputStream bytearrayoutputstream;
-
-    byte[] _byte;
 
     public MyCustomAdapter(ArrayList<File> arrayList, Context context) {
         this.arrayList = arrayList;
         this.context = context;
-        bytearrayoutputstream = new ByteArrayOutputStream();
+
 
     }
 
@@ -62,8 +59,9 @@ public class MyCustomAdapter extends BaseAdapter {
 
         view = inflater.from(context).inflate(R.layout.my_image_list,viewGroup,false);
 
+        ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();;
 
-
+        byte[] _byte;
 
         Bitmap myBitmap = BitmapFactory.decodeFile(arrayList.get(i).getAbsolutePath()),bitmap2;
 
@@ -77,9 +75,6 @@ public class MyCustomAdapter extends BaseAdapter {
         imageView = (ImageView) view.findViewById(R.id.img);
 
         imageView.setImageBitmap(bitmap2);
-
-
-
 
         return view;
     }

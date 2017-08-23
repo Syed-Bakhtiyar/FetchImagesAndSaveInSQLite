@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -72,16 +73,27 @@ public class MainActivity extends AppCompatActivity {
 
     private long refid;
 
+    String api_file_name[];
 
+    ArrayList<String> directory_file_name;
 
     MyCustomAdapter myCustomAdapter;
+
+    double num_of_download, answer = 0, file_size;
+
+    int per =0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+//        this.deleteDatabase(SQLiteDB.DB_NAME);
+
         downloadManager = (DownloadManager) getSystemService(Activity.DOWNLOAD_SERVICE);
+
+        directory_file_name = new ArrayList<>();
 
         registerReceiver(onComplete,
                 new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
@@ -90,7 +102,9 @@ public class MainActivity extends AppCompatActivity {
 
         gridView = (GridView) findViewById(R.id.grid);
 
-        progressDialog.setMessage("Please wait");
+        progressDialog.setMessage("Please wait "+per +"%");
+
+        progressDialog.setCanceledOnTouchOutside(false);
 
         asyncHttpClient = new AsyncHttpClient();
 
@@ -98,13 +112,29 @@ public class MainActivity extends AppCompatActivity {
 
         myCustomAdapter = new MyCustomAdapter(arrayList,getApplicationContext());
 
-        gridView.setAdapter(myCustomAdapter);
 
         button = (Button) findViewById(R.id.showdata);
 
         final File file = new File(Environment.getExternalStorageDirectory().toString() + "/Hello/images");
 
         if(file.isDirectory()){
+
+//            File[] ff = file.listFiles();
+//
+//
+//            for (File f : ff){
+//
+////                Toast.makeText(this, f.getPath(), Toast.LENGTH_SHORT).show();
+//
+//                f.delete();
+//
+//
+//
+//            }
+//
+//
+//            Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
+//            file.delete();
 
             button.setVisibility(View.VISIBLE);
 
@@ -121,6 +151,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+
+                gridView.setAdapter(null);
                 try {
                     String path = Environment.getExternalStorageDirectory().toString() + "/Hello/images";
                     Log.d("Files", "Path: " + path);
@@ -133,6 +165,10 @@ public class MainActivity extends AppCompatActivity {
                         arrayList.add(files[i]);
 
                         myCustomAdapter.notifyDataSetChanged();
+
+                        gridView.setAdapter(myCustomAdapter);
+
+
                     }
                 }catch (Exception e){
 
@@ -151,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-//                progressDialog.show();
+                progressDialog.show();
 
                 asyncHttpClient.get("http://storeperfect.colgate-palmolive.com.pk/stagingikode/ApiNew/index.php/defaultCall/getImagePlanogram",null, new JsonHttpResponseHandler() {
 
@@ -186,7 +222,15 @@ public class MainActivity extends AppCompatActivity {
 
                             JSONArray jsonArray = response.getJSONArray("details");
 
+                            file_size = jsonArray.length();
+
+                            num_of_download = jsonArray.length();
+
+                                api_file_name = new String[jsonArray.length()];
+
                             for(int i=0 ; i<jsonArray.length();i++){
+
+
 
                                 JSONObject jsonObject = (JSONObject) jsonArray.get(i);
 
@@ -196,6 +240,10 @@ public class MainActivity extends AppCompatActivity {
                                 Uri uri = Uri.parse(value);
 
                                 File ff = new File(String.valueOf(value));
+
+//                                Log.d("uripath", "onSuccess: "+ff.getName());
+
+                                api_file_name[i] = value;
 
                                 DownloadManager.Request request = new DownloadManager.Request(uri);
 
@@ -224,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
 
                                 list.add(refid);
 
-                                Log.d("data ", "onSuccess: "+value);
+//                                Log.d("data ", "onSuccess: "+value);
 
 
 
@@ -269,18 +317,22 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    public void myfunction(String uri){
+    public void myfunction(String link){
 
 
         sqLiteDB = new SQLiteDB(this);
 
-        if(sqLiteDB.save("hello")){
+        if(sqLiteDB.save(link)){
 
-            Toast.makeText(this, "Inserted", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "Inserted", Toast.LENGTH_SHORT).show();
+
+            Log.d("Inserted", "inserted");
 
         } else {
 
-            Toast.makeText(this, "Not Inserted", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "Not Inserted", Toast.LENGTH_SHORT).show();
+
+            Log.d("not_insert", "not inserted");
 
         }
 
@@ -361,9 +413,84 @@ public class MainActivity extends AppCompatActivity {
 
            list.remove(referenceId);
 
+            num_of_download -= 1 ;
+
+            answer = num_of_download*file_size / 100;
+
+
+
+            progressDialog.setMessage("Please wait "+(100-answer) +"%");
 
             if (list.isEmpty())
             {
+
+
+                ////////////////////////////////////////////////////
+
+
+
+                // Get Directory path
+
+                try {
+                    String path = Environment.getExternalStorageDirectory().toString() + "/Hello/images";
+                    Log.d("Files", "Path: " + path);
+                    File directory = new File(path);
+                    File[] files = directory.listFiles();
+                    Log.d("Files", "Size: " + files.length);
+                    for (int i = 0; i < files.length; i++) {
+                        Log.d("Files", "FileName:" + files[i].getName());
+
+//                        arrayList.add(files[i]);
+
+                        directory_file_name.add(files[i].getName());
+
+                        Log.d("path","Abolute_path"+files[i].getAbsolutePath() +" Only_path "+files[i].getPath());
+
+//                        myfunction(files[i].getAbsolutePath());
+
+                        myfunction(files[i].getPath());
+
+
+//                        myCustomAdapter.notifyDataSetChanged();
+//
+//                        gridView.setAdapter(myCustomAdapter);
+
+
+                    }
+                }catch (Exception e){
+
+
+
+                    Log.d("Error", "File Not found: "+e);
+                }
+
+                try {
+                    backupDatabase();
+                } catch (Exception e) {
+                    Log.d("error", "onReceive: " + e);
+                }
+
+
+////////////////////////////////////////////////////////////
+
+
+
+                /*
+
+
+                Comaprison between api and directory path
+
+
+                 */
+
+
+
+
+
+
+
+                ////////////////////////////////////////////////////////
+
 
 
                 Log.e("INSIDE", "" + referenceId);
@@ -377,6 +504,9 @@ public class MainActivity extends AppCompatActivity {
                 NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 notificationManager.notify(455, mBuilder.build());
 
+
+
+                progressDialog.dismiss();
 
             }
 
@@ -393,6 +523,44 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(onComplete);
 
 
+    }
+
+
+    public void backupDatabase() throws IOException
+    {
+        boolean success =true;
+        File file = null;
+        file = new File(Environment.getExternalStorageDirectory() +"/StorePerfectApp/database");
+
+        if (file.exists()) {
+            success = true;
+        } else {
+            success = file.mkdirs();
+        }
+
+        if (success)
+        {
+//            String inFileName = "/data/data/" + getPackageName() + "/databases/StorePerfectDB";
+            String inFileName = "/data/data/bilal.com.apiparseandsaveinsqlite/databases/Mydb";
+            File dbFile = new File(inFileName);
+            FileInputStream fis = new FileInputStream(dbFile);
+
+            String outFileName = Environment.getExternalStorageDirectory()+"/Apiparse/database/localDB.db";
+
+            // Open the empty db as the output stream
+            OutputStream output = new FileOutputStream(outFileName);
+
+            // Transfer bytes from the inputfile to the outputfile
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = fis.read(buffer))>0) {
+                output.write(buffer, 0, length);
+            }
+
+            output.flush();
+            output.close();
+            fis.close();
+        }
     }
 
 
