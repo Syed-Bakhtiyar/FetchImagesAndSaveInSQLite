@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     double num_of_download, answer = 0, file_size;
 
     int per =0;
+    private int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -322,6 +323,15 @@ public class MainActivity extends AppCompatActivity {
 
         sqLiteDB = new SQLiteDB(this);
 
+        if(count == 0) {
+
+            sqLiteDB.deleteTable();
+
+
+        }
+
+        count = 1;
+
         if(sqLiteDB.save(link)){
 
 //            Toast.makeText(this, "Inserted", Toast.LENGTH_SHORT).show();
@@ -541,11 +551,11 @@ public class MainActivity extends AppCompatActivity {
         if (success)
         {
 //            String inFileName = "/data/data/" + getPackageName() + "/databases/StorePerfectDB";
-            String inFileName = "/data/data/bilal.com.apiparseandsaveinsqlite/databases/Mydb";
+            String inFileName = "/data/data/bilal.com.apiparseandsaveinsqlite/databases/"+SQLiteDB.DB_NAME;
             File dbFile = new File(inFileName);
             FileInputStream fis = new FileInputStream(dbFile);
 
-            String outFileName = Environment.getExternalStorageDirectory()+"/Apiparse/database/localDB.db";
+            String outFileName = Environment.getExternalStorageDirectory().toString() + "/Hello/images/localDB.db";
 
             // Open the empty db as the output stream
             OutputStream output = new FileOutputStream(outFileName);

@@ -12,7 +12,7 @@ import android.util.Log;
 
 public class SQLiteDB extends SQLiteOpenHelper {
 
-    public static final String DB_NAME = "Mydb.db";
+    public static final String DB_NAME = "SqlDB.db";
 
     public static final String TABLE_NAME = "IMAGES";
 
@@ -20,7 +20,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
 
     public static final String LINK = "LINK";
 
-    public static final String CREATEIMAGE_TABLE = "CREATE TABLE "+TABLE_NAME+" ( "+_ID+" INTEGER PRIMARY KEY AUTO INCREMENT , "+LINK+" TEXT)";
+    public static final String CREATEIMAGE_TABLE = "CREATE TABLE IF NOT EXISTS "+TABLE_NAME+ " ("+_ID+" INTEGER PRIMARY KEY AUTOINCREMENT , "+LINK+" TEXT)";
 
     public static final String DROP_TABLE = "DROP TABLE IF EXISTS "+TABLE_NAME;
 
@@ -33,7 +33,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
     ContentValues contentValues;
 
     public SQLiteDB(Context context) {
-        super(context, DB_NAME, null, 1);
+        super(context, DB_NAME, null, 5);
 
         this.context = context;
     }
@@ -97,6 +97,27 @@ public class SQLiteDB extends SQLiteOpenHelper {
 
     }
 
+
+
+    public void deleteTable(){
+
+        try {
+
+            SQLiteDatabase db = getWritableDatabase();
+
+            db = this.getWritableDatabase();
+
+            db.delete(TABLE_NAME, null, null);
+
+
+
+        }catch (Exception e){
+
+            Log.d("delete", "deleteTable: "+e);
+
+        }
+
+    }
 
 
 }
